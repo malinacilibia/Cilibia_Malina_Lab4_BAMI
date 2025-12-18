@@ -5,6 +5,8 @@ using System;
 using System.Linq;
 using System.IO;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+
 namespace Cilibia_Malina_Lab4
 {
     public partial class PricePredictionModel
@@ -15,6 +17,7 @@ namespace Cilibia_Malina_Lab4
         #region model input class
         public class ModelInput
         {
+
             [LoadColumn(0)]
             [ColumnName(@"vendor_id")]
             public string Vendor_id { get; set; }
@@ -25,6 +28,7 @@ namespace Cilibia_Malina_Lab4
 
             [LoadColumn(2)]
             [ColumnName(@"passenger_count")]
+            [Range(1, 6, ErrorMessage = "Numărul de pasageri trebuie să fie între 1 şi 6.")]
             public float Passenger_count { get; set; }
 
             [LoadColumn(3)]
@@ -33,6 +37,7 @@ namespace Cilibia_Malina_Lab4
 
             [LoadColumn(4)]
             [ColumnName(@"trip_distance")]
+            [Range(0.1, 1000, ErrorMessage = "Distanţa trebuie să fie pozitivă.")]
             public float Trip_distance { get; set; }
 
             [LoadColumn(5)]
