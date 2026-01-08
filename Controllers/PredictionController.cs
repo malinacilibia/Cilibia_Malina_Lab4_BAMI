@@ -51,13 +51,60 @@ namespace Price_Prediction.Controllers
 
 
         [HttpGet]
-        public async Task<IActionResult> History()
+        public async Task<IActionResult> History(
+    string? paymentType,
+    float? minPrice,
+    float? maxPrice,
+    DateTime? startDate, 
+    DateTime? endDate,   
+    string? sortOrder)
         {
-            var history = await _context.PredictionHistories
-                .OrderByDescending(p => p.CreatedAt)
-                .ToListAsync();
+            var query = _context.PredictionHistories.AsQueryable();
 
-            return View(history);
+            if (!string.IsNullOrEmpty(paymentType))
+            {
+                query = query.Where(p => p.PaymentType == paymentType);
+            }
+
+            if (minPrice.HasValue)
+            {
+                query = query.Where(p => p.PredictedPrice >= minPrice.Value);
+            }
+
+            if (maxPrice.HasValue)
+            {
+                query = query.Where(p => p.PredictedPrice <= maxPrice.Value);
+            }
+
+            if (startDate.HasValue)
+            {
+                query = query.Where(p => p.CreatedAt >= startDate.Value);
+            }
+
+            if (endDate.HasValue)
+            {
+                query = query.Where(p => p.CreatedAt < endDate.Value.AddDays(1));
+            }
+
+            query = sortOrder switch
+            {
+                "price_asc" => query.OrderBy(p => p.PredictedPrice),
+                "price_desc" => query.OrderByDescending(p => p.PredictedPrice),
+                "date_asc" => query.OrderBy(p => p.CreatedAt),      
+                "date_desc" => query.OrderByDescending(p => p.CreatedAt), 
+                _ => query.OrderByDescending(p => p.CreatedAt)     
+            };
+
+            ViewBag.CurrentPaymentType = paymentType;
+            ViewBag.CurrentMinPrice = minPrice;
+            ViewBag.CurrentMaxPrice = maxPrice;
+            ViewBag.CurrentStartDate = startDate?.ToString("yyyy-MM-dd"); 
+            ViewBag.CurrentEndDate = endDate?.ToString("yyyy-MM-dd");
+            ViewBag.CurrentSortOrder = sortOrder;
+
+            var result = await query.ToListAsync();
+
+            return View(result);
         }
 
 
